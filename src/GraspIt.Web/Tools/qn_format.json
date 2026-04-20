@@ -1,0 +1,104 @@
+[
+  {
+    "code": "24PXYZ401 - ",
+    "title": "Artificial Intelligence Fundamentals",
+    "semester": "Fourth Semester BCA",
+    "examNo": "-I",
+    "duration": "60 Minutes",
+    "date": "10 April 2026",
+    "time": "10:00 AM - 11:00 AM",
+    "maxMarks": "25 Marks",
+    "note": "1) Answer Two full questions choosing One full question from each of the units.",
+    "footer": "BT* : Bloom's Taxonomy   L*: Level   TLO*: Topic Level Outcome",
+    "units": [
+      {
+        "name": "Unit - I",
+        "questions": [
+          {
+            "no": "1",
+            "parts": [
+              {
+                "sub": "a",
+                "text": "Define Artificial Intelligence and explain its applications in modern healthcare.",
+                "marks": "6",
+                "bt": "L2",
+                "co": "CO1"
+              },
+              {
+                "sub": "b",
+                "text": "Differentiate between Strong AI and Weak AI with examples.",
+                "marks": "6.5",
+                "bt": "L2",
+                "co": "CO1"
+              }
+            ]
+          },
+          "OR",
+          {
+            "no": "2",
+            "parts": [
+              {
+                "sub": "a",
+                "text": "Explain the concept of rational agents. How are they structured?",
+                "marks": "6",
+                "bt": "L2",
+                "co": "CO1"
+              },
+              {
+                "sub": "b",
+                "text": "Describe the PEAS representation for an automated taxi driver.",
+                "marks": "6.5",
+                "bt": "L3",
+                "co": "CO1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Unit - II",
+        "questions": [
+          {
+            "no": "3",
+            "parts": [
+              {
+                "sub": "a",
+                "text": "Solve the 8-puzzle problem using A* search algorithm. Explain the heuristic function used.",
+                "marks": "6.5",
+                "bt": "L4",
+                "co": "CO2"
+              },
+              {
+                "sub": "b",
+                "text": "Explain the differences between Breadth-First Search and Depth-First Search.",
+                "marks": "6",
+                "bt": "L2",
+                "co": "CO2"
+              }
+            ]
+          },
+          "OR",
+          {
+            "no": "4",
+            "parts": [
+              {
+                "sub": "a",
+                "text": "Trace the Minimax algorithm on a given game tree to determine the optimal move.",
+                "marks": "6.5",
+                "bt": "L3",
+                "co": "CO2"
+              },
+              {
+                "sub": "b",
+                "text": "What is Alpha-Beta pruning? How does it improve the Minimax algorithm?",
+                "marks": "6",
+                "bt": "L2",
+                "co": "CO2"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

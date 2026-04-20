@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  database:
+    image: pgvector/pgvector:pg16
+    container_name: graspit-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '${DB_CPU_LIMIT}'
+          memory: '${DB_RAM_LIMIT}'
+
+volumes:
+  postgres_data:

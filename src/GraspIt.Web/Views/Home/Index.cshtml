@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "GraspIt";
+}
+
+<div class="py-5 mt-4 text-center">
+    <div class="mb-5">
+        <h1 class="hero-title mb-3">
+            Study Smarter with<br /><span class="hero-accent">AI-Powered Intelligence</span>
+        </h1>
+        <p class="text-secondary mx-auto" style="max-width: 580px; font-size: 1.05rem; line-height: 1.7;">
+            Upload your study materials, ask questions grounded in your documents using RAG,
+            and generate exam papers that match your university's format.
+        </p>
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <a asp-controller="Chat" asp-action="Index" class="btn btn-primary btn-lg px-4 py-2 rounded-pill fw-semibold">
+                Start Chatting →
+            </a>
+            <a asp-controller="Documents" asp-action="Index" class="btn btn-light btn-lg px-4 py-2 rounded-pill fw-semibold">
+                Upload Documents
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-3 justify-content-center" style="max-width: 1000px; margin: 0 auto;">
+        <div class="col-md-4">
+            <div class="feature-card h-100 text-start fade-in-up">
+                <div class="feature-icon">💬</div>
+                <h5 class="fw-bold mb-2">RAG-Powered Chat</h5>
+                <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6;">
+                    Ask questions and get answers grounded in your uploaded textbooks, notes, and slides using vector similarity search.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card h-100 text-start fade-in-up" style="animation-delay: 0.1s;">
+                <div class="feature-icon">📄</div>
+                <h5 class="fw-bold mb-2">Document Embedding</h5>
+                <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6;">
+                    Upload PDFs that are automatically chunked, embedded, and stored permanently in your pgvector knowledge base.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card h-100 text-start fade-in-up" style="animation-delay: 0.2s;">
+                <div class="feature-icon">🎓</div>
+                <h5 class="fw-bold mb-2">Exam Generation</h5>
+                <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6;">
+                    Upload a sample question paper. Our AI clones its format, retrieves syllabus context via RAG, and generates a new exam.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,474 @@
+@{
+    ViewData["Title"] = "GraspIt Workspace";
+}
+
+<div class="row gx-3" style="min-height: calc(100vh - 140px);">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="col-md-3 chat-sidebar-col d-flex flex-column gap-2 py-3">
+        <div class="d-flex justify-content-between align-items-center px-2 mb-1">
+            <span class="fw-bold text-secondary" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Chats</span>
+            <button class="btn btn-sm btn-primary rounded-pill px-3 py-1" style="font-size: 0.78rem;" onclick="createNewSession()">+ New</button>
+        </div>
+
+        <!-- Folder creation -->
+        <div class="px-2 mb-2">
+            <div class="input-group input-group-sm">
+                <input type="text" id="newFolderName" class="form-control" placeholder="New folder name..." style="font-size: 0.8rem;" />
+                <button class="btn btn-light" onclick="createFolder()" style="font-size: 0.78rem;">📁+</button>
+            </div>
+        </div>
+
+        <div class="chat-sidebar flex-grow-1 p-2" id="chat-sidebar" style="overflow-y: auto;">
+            <div id="folders-container"></div>
+            <div class="chat-folder-header mt-2" style="cursor: default;">📋 All Chats</div>
+            <div id="sessions-container"></div>
+        </div>
+    </div>
+
+    <!-- MAIN CHAT AREA -->
+    <div class="col-md-6 d-flex flex-column py-3">
+        <div class="card flex-grow-1 d-flex flex-column">
+            <div class="card-header d-flex justify-content-between align-items-center py-3 px-4">
+                <h6 class="mb-0 fw-bold" id="chat-title">New Chat</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rag-toggle active" id="rag-toggle" onclick="toggleRag()">
+                        <label class="toggle-switch mb-0">
+                            <input type="checkbox" id="rag-checkbox" checked />
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="font-size: 0.78rem; font-weight: 500;">RAG</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="card-body chat-window d-flex flex-column p-3" id="chat-window" style="overflow-y: auto; flex: 1 1 0; min-height: 0;">
+                <div class="d-flex mb-3 fade-in-up">
+                    <div class="msg-bot p-3 shadow-sm">
+                        <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 0.3rem;"><strong>🤖 GraspIt</strong></div>
+                        <div>Hello! Upload your study materials in the <strong>Documents</strong> section, then ask me anything. I'll retrieve context from your knowledge base using RAG.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="card-footer p-3">
+                <form id="chat-form">
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden" style="border: 1px solid var(--border-color);">
+                        <input type="text" id="chat-input" class="form-control border-0 shadow-none px-4 py-3" placeholder="Ask a question about your documents..." required autocomplete="off" style="background: var(--bg-input) !important;" />
+                        <button type="submit" id="send-btn" class="btn btn-primary px-4 border-0 fw-medium" style="border-radius: 0 50px 50px 0 !important;">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="col-md-3 d-flex flex-column gap-3 py-3">
+        <div class="card">
+            <div class="card-body p-3">
+                <label class="form-label mb-1" style="font-size: 0.78rem;">Active LLM Engine</label>
+                <select id="providerDropdown" class="form-select form-select-sm">
+                    <option value="">— System Default —</option>
+                    @if(ViewBag.Providers != null)
+                    {
+                        foreach (var provider in ViewBag.Providers)
+                        {
+                            if (provider.IsDefault)
+                            {
+                                <option value="@provider.Id" selected>@provider.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@provider.Id">@provider.Name</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="card flex-grow-1" id="doc-filter-card">
+            <div class="card-header py-2 px-3">
+                <span class="fw-bold" style="font-size: 0.85rem;">📚 RAG Document Filter</span>
+            </div>
+            <div class="card-body p-3" style="overflow-y: auto; max-height: 400px;">
+                <p class="text-muted mb-2" style="font-size: 0.75rem;">Select documents to scope RAG queries, or leave empty to search all.</p>
+                <div id="doc-filter-list">
+                    <div class="text-muted text-center py-3" style="font-size: 0.8rem;">Loading documents...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-3">
+                <label class="form-label mb-1" style="font-size: 0.78rem;">Quick Upload</label>
+                <form asp-action="Upload" asp-controller="Documents" method="post" enctype="multipart/form-data">
+                    <select name="documentType" class="form-select form-select-sm mb-2" required>
+                        <option value="">— Material Type —</option>
+                        <option value="Syllabus">Syllabus</option>
+                        <option value="Textbook">Textbook</option>
+                        <option value="Presentation Slides">Slides</option>
+                        <option value="Teacher Notes">Lecture Notes</option>
+                        <option value="Previous Question Paper">Previous Paper</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="input-group input-group-sm">
+                        <input type="file" class="form-control" name="file" accept=".pdf" required />
+                        <button type="submit" class="btn btn-primary" style="font-size: 0.78rem;">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentSessionId = null;
+    let selectedDocIds = [];
+    let currentFolders = [];
+    let draggedSessionId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadFolders().then(() => loadSessions());
+        loadDocuments();
+    });
+
+    // ── RAG Toggle ──────────────────────────────────────────────────
+    function toggleRag() {
+        const cb = document.getElementById('rag-checkbox');
+        cb.checked = !cb.checked;
+        document.getElementById('rag-toggle').classList.toggle('active', cb.checked);
+        document.getElementById('doc-filter-card').style.opacity = cb.checked ? '1' : '0.4';
+    }
+
+    // ── Chat Submission ─────────────────────────────────────────────
+    document.getElementById('chat-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const providerId = document.getElementById('providerDropdown').value;
+        const useRag = document.getElementById('rag-checkbox').checked;
+
+        addMessage('You', message, 'user');
+        input.value = '';
+        document.getElementById('send-btn').disabled = true;
+
+        const typingId = showTypingIndicator();
+
+        try {
+            const response = await fetch('/Chat/AskQuestion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: message,
+                    providerId: providerId ? parseInt(providerId) : null,
+                    sessionId: currentSessionId,
+                    useRag,
+                    documentIds: useRag ? selectedDocIds : []
+                })
+            });
+
+            removeTypingIndicator(typingId);
+
+            if (response.ok) {
+                const data = await response.json();
+                addMessage('GraspIt', data.answer, 'bot');
+                if (!currentSessionId) {
+                    currentSessionId = data.sessionId;
+                    loadSessions();
+                }
+            } else {
+                addMessage('System', 'Error communicating with AI service.', 'error');
+            }
+        } catch (err) {
+            removeTypingIndicator(typingId);
+            addMessage('System', 'Network error: ' + err.message, 'error');
+        }
+
+        document.getElementById('send-btn').disabled = false;
+    });
+
+    // ── Think-tag Parser ────────────────────────────────────────────
+    // Converts <think>...</think> blocks (from reasoning LLMs like DeepSeek)
+    // into expandable <details> elements with a chevron indicator.
+    function parseReasoningTags(text) {
+        return text.replace(/<think>([\s\S]*?)<\/think>/g, (_, inner) => {
+            const escaped = inner.trim()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            return `<details class="reasoning-block">
+                <summary>
+                    <span class="reasoning-chevron">▶</span>
+                    <span>Reasoning Process</span>
+                </summary>
+                <div class="reasoning-content">${escaped}</div>
+            </details>`;
+        });
+    }
+
+    // ── Message Renderer ────────────────────────────────────────────
+    function addMessage(sender, text, role) {
+        const w = document.getElementById('chat-window');
+        const div = document.createElement('div');
+        div.className = `d-flex mb-3 fade-in-up ${role === 'user' ? 'justify-content-end' : 'justify-content-start'}`;
+
+        let formatted = parseReasoningTags(text);
+        if (role !== 'user' && typeof marked !== 'undefined') {
+            formatted = marked.parse(formatted);
+        } else if (role === 'user') {
+            formatted = `<p class="mb-0">${formatted.replace(/\n/g, '<br>')}</p>`;
+        }
+
+        const cssClass = role === 'user' ? 'msg-user' : 'msg-bot';
+        const exportBtns = role === 'bot' ? buildExportButtons(text) : '';
+        const label = role === 'user' ? '' : `<div class="msg-label"><strong>${role === 'error' ? '⚠️ System' : '🤖 ' + sender}</strong></div>`;
+
+        div.innerHTML = `<div class="${cssClass} p-3 shadow-sm">
+            ${label}
+            <div class="message-content">${formatted}</div>
+            ${exportBtns}
+        </div>`;
+
+        w.appendChild(div);
+        w.scrollTop = w.scrollHeight;
+    }
+
+    function buildExportButtons(rawText) {
+        const safe = rawText.replace(/"/g, '&quot;');
+        return `<div class="mt-2 d-flex gap-2 export-tools">
+            <form action="/Export/DownloadDocx" method="POST" target="_blank" class="m-0">
+                <input type="hidden" name="content" value="${safe}" />
+                <button type="submit" class="btn btn-sm export-btn">DOCX</button>
+            </form>
+            <form action="/Export/DownloadPdf" method="POST" target="_blank" class="m-0">
+                <input type="hidden" name="content" value="${safe}" />
+                <button type="submit" class="btn btn-sm export-btn">PDF</button>
+            </form>
+            <form action="/Export/DownloadMarkdown" method="POST" target="_blank" class="m-0">
+                <input type="hidden" name="content" value="${safe}" />
+                <button type="submit" class="btn btn-sm export-btn">MD</button>
+            </form>
+        </div>`;
+    }
+
+    function showTypingIndicator() {
+        const w = document.getElementById('chat-window');
+        const div = document.createElement('div');
+        const id = 'typing-' + Date.now();
+        div.id = id;
+        div.className = 'd-flex mb-3 justify-content-start fade-in-up';
+        div.innerHTML = `<div class="msg-bot p-3 shadow-sm"><div class="msg-label"><strong>🤖 GraspIt</strong></div><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+        w.appendChild(div);
+        w.scrollTop = w.scrollHeight;
+        return id;
+    }
+
+    function removeTypingIndicator(id) {
+        document.getElementById(id)?.remove();
+    }
+
+    // ── Session Management ──────────────────────────────────────────
+    async function loadSessions() {
+        const res = await fetch('/Chat/GetSessions');
+        const sessions = await res.json();
+        const container = document.getElementById('sessions-container');
+        container.innerHTML = '';
+        sessions.filter(s => !s.folderId).forEach(s => container.appendChild(createSessionEl(s)));
+    }
+
+    function createSessionEl(s) {
+        const div = document.createElement('div');
+        div.className = `chat-session-item d-flex justify-content-between align-items-center ${s.id === currentSessionId ? 'active' : ''}`;
+        div.draggable = true;
+        div.dataset.sessionId = s.id;
+
+        // Drag events
+        div.addEventListener('dragstart', e => {
+            draggedSessionId = s.id;
+            div.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        div.addEventListener('dragend', () => {
+            draggedSessionId = null;
+            div.classList.remove('dragging');
+        });
+
+        // Folder move dropdown
+        let opts = '<option value="">📁 Move to…</option><option value="null">All Chats</option>';
+        currentFolders.forEach(f => opts += `<option value="${f.id}" ${s.folderId === f.id ? 'selected' : ''}>${f.name}</option>`);
+
+        div.innerHTML = `
+            <span class="text-truncate" style="flex: 1; cursor: grab;" title="${s.title}">${s.title}</span>
+            <div class="d-flex align-items-center gap-1" style="flex-shrink: 0;">
+                <select class="session-move-select" onchange="event.stopPropagation(); moveSession(${s.id}, this.value)">${opts}</select>
+                <button class="btn btn-sm p-0 px-1 session-delete-btn" onclick="event.stopPropagation(); deleteSession(${s.id})" title="Delete">✕</button>
+            </div>`;
+        div.addEventListener('click', () => loadSession(s.id, s.title));
+        return div;
+    }
+
+    async function moveSession(sessionId, folderIdStr) {
+        if (folderIdStr === "") return;
+        const fid = folderIdStr === "null" ? null : parseInt(folderIdStr);
+        await fetch('/Chat/MoveSession', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, folderId: fid })
+        });
+        await loadFolders();
+        await loadSessions();
+    }
+
+    async function loadSession(id, title) {
+        currentSessionId = id;
+        document.getElementById('chat-title').textContent = title;
+        const w = document.getElementById('chat-window');
+        w.innerHTML = '';
+
+        const res = await fetch(`/Chat/GetMessages?sessionId=${id}`);
+        const messages = await res.json();
+        messages.forEach(m => addMessage(m.role === 'user' ? 'You' : 'GraspIt', m.content, m.role === 'user' ? 'user' : 'bot'));
+        loadSessions();
+    }
+
+    function createNewSession() {
+        currentSessionId = null;
+        document.getElementById('chat-title').textContent = 'New Chat';
+        document.getElementById('chat-window').innerHTML =
+            `<div class="d-flex mb-3 fade-in-up"><div class="msg-bot p-3 shadow-sm"><div class="msg-label"><strong>🤖 GraspIt</strong></div><div>Hello! Start a conversation. I'll use your knowledge base for context.</div></div></div>`;
+    }
+
+    async function deleteSession(id) {
+        if (!confirm('Delete this chat?')) return;
+        await fetch('/Chat/DeleteSession', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        if (currentSessionId === id) createNewSession();
+        loadSessions();
+    }
+
+    // ── Folder Management (with drag-and-drop targets) ──────────────
+    async function loadFolders() {
+        const res = await fetch('/Chat/GetFolders');
+        currentFolders = await res.json();
+        const container = document.getElementById('folders-container');
+        container.innerHTML = '';
+
+        for (const f of currentFolders) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mb-1 folder-wrapper';
+
+            // Folder header (acts as drop target)
+            const header = document.createElement('div');
+            header.className = 'chat-folder-header';
+            header.innerHTML = `<span class="folder-arrow">▶</span> <span class="text-truncate" style="flex:1;">${f.name}</span>
+                <span class="badge bg-secondary">${f.sessionCount}</span>
+                <button class="btn btn-sm p-0 px-1 session-delete-btn" onclick="event.stopPropagation(); deleteFolder(${f.id})" title="Delete folder">✕</button>`;
+            header.addEventListener('click', () => toggleFolder(f.id, wrapper));
+
+            // Drag-and-drop: highlight folder on drag-over, move session on drop
+            header.addEventListener('dragover', e => { e.preventDefault(); header.classList.add('drop-target'); });
+            header.addEventListener('dragleave', () => header.classList.remove('drop-target'));
+            header.addEventListener('drop', async e => {
+                e.preventDefault();
+                header.classList.remove('drop-target');
+                if (draggedSessionId) {
+                    await moveSession(draggedSessionId, f.id.toString());
+                    draggedSessionId = null;
+                }
+            });
+
+            wrapper.appendChild(header);
+
+            const sessionsDiv = document.createElement('div');
+            sessionsDiv.id = `folder-sessions-${f.id}`;
+            sessionsDiv.className = 'ps-3 folder-sessions-container';
+            sessionsDiv.style.display = 'none';
+            wrapper.appendChild(sessionsDiv);
+
+            container.appendChild(wrapper);
+        }
+    }
+
+    async function toggleFolder(folderId, wrapper) {
+        const sessDiv = wrapper.querySelector(`#folder-sessions-${folderId}`);
+        const arrow = wrapper.querySelector('.folder-arrow');
+        if (sessDiv.style.display === 'none') {
+            const res = await fetch('/Chat/GetSessions');
+            const all = await res.json();
+            sessDiv.innerHTML = '';
+            all.filter(s => s.folderId === folderId).forEach(s => sessDiv.appendChild(createSessionEl(s)));
+            sessDiv.style.display = 'block';
+            if (arrow) arrow.textContent = '▼';
+        } else {
+            sessDiv.style.display = 'none';
+            if (arrow) arrow.textContent = '▶';
+        }
+    }
+
+    async function createFolder() {
+        const input = document.getElementById('newFolderName');
+        const name = input.value.trim();
+        if (!name) return;
+        await fetch('/Chat/CreateFolder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+        input.value = '';
+        loadFolders();
+    }
+
+    async function deleteFolder(id) {
+        if (!confirm('Delete this folder? Chats inside will be moved to All Chats.')) return;
+        await fetch('/Chat/DeleteFolder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        loadFolders();
+        loadSessions();
+    }
+
+    // ── "All Chats" drop target (move session out of any folder) ─────
+    document.addEventListener('DOMContentLoaded', () => {
+        const allChatsHeader = document.querySelector('#chat-sidebar > .chat-folder-header');
+        if (allChatsHeader) {
+            allChatsHeader.addEventListener('dragover', e => { e.preventDefault(); allChatsHeader.classList.add('drop-target'); });
+            allChatsHeader.addEventListener('dragleave', () => allChatsHeader.classList.remove('drop-target'));
+            allChatsHeader.addEventListener('drop', async e => {
+                e.preventDefault();
+                allChatsHeader.classList.remove('drop-target');
+                if (draggedSessionId) {
+                    await moveSession(draggedSessionId, "null");
+                    draggedSessionId = null;
+                }
+            });
+        }
+    });
+
+    // ── Document Filter ─────────────────────────────────────────────
+    async function loadDocuments() {
+        const res = await fetch('/Chat/GetDocuments');
+        const docs = await res.json();
+        const container = document.getElementById('doc-filter-list');
+
+        if (docs.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center py-2" style="font-size: 0.8rem;">No documents uploaded yet.</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        docs.forEach(d => {
+            const pill = document.createElement('div');
+            pill.className = 'doc-pill mb-2';
+            pill.innerHTML = `<span>📄</span> <span class="text-truncate">${d.title}</span> <span class="badge bg-secondary ms-auto">${d.chunkCount} chunks</span>`;
+            pill.addEventListener('click', () => {
+                pill.classList.toggle('selected');
+                if (pill.classList.contains('selected')) {
+                    if (!selectedDocIds.includes(d.id)) selectedDocIds.push(d.id);
+                } else {
+                    selectedDocIds = selectedDocIds.filter(x => x !== d.id);
+                }
+            });
+            container.appendChild(pill);
+        });
+    }
+</script>
+}

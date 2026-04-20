@@ -1,0 +1,124 @@
+@model IEnumerable<GraspIt.Core.Entities.Document>
+@{
+    ViewData["Title"] = "Document Library";
+}
+
+<div class="py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">📄 Document Library</h3>
+                    <p class="text-secondary mb-0" style="font-size: 0.9rem;">Upload PDFs to embed them into your RAG knowledge base. Documents are stored permanently.</p>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success fade-in-up">✅ @TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger fade-in-up">⚠️ @TempData["Error"]</div>
+            }
+
+            <!-- Upload Card -->
+            <div class="card mb-4 fade-in-up">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Upload New Document</h5>
+                    <form asp-action="Upload" asp-controller="Documents" method="post" enctype="multipart/form-data">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Material Type</label>
+                                <select name="documentType" class="form-select" required>
+                                    <option value="">— Select Type —</option>
+                                    <option value="Syllabus">Syllabus</option>
+                                    <option value="Textbook">Textbook</option>
+                                    <option value="Presentation Slides">Presentation Slides</option>
+                                    <option value="Teacher Notes">Teacher/Lecture Notes</option>
+                                    <option value="Previous Question Paper">Previous Question Paper</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">PDF File</label>
+                                <input type="file" class="form-control" name="file" accept=".pdf" required />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Upload & Embed</button>
+                            </div>
+                        </div>
+                        <div class="form-text mt-2">Documents are parsed with PdfPig, chunked, and embedded using your local embedding model. They persist in PostgreSQL + pgvector.</div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Document Table -->
+            <div class="card fade-in-up" style="animation-delay: 0.1s;">
+                <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Uploaded Documents</span>
+                    <span class="badge bg-primary">@Model.Count() documents</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <p class="text-muted mb-0">No documents uploaded yet. Upload a PDF above to get started.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">Document</th>
+                                        <th>Type</th>
+                                        <th>Chunks</th>
+                                        <th>Uploaded</th>
+                                        <th class="text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var doc in Model)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <span class="fw-medium">@doc.Title</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@doc.DocumentType</span>
+                                            </td>
+                                            <td>
+                                                @if (doc.DocumentChunks.Any())
+                                                {
+                                                    <span class="badge bg-success">@doc.DocumentChunks.Count embedded</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Processing...</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="text-muted" style="font-size: 0.85rem;">@doc.UploadedAt.ToString("dd MMM yyyy HH:mm")</span>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <form asp-action="Delete" asp-route-id="@doc.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this document and all its embeddings?')">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

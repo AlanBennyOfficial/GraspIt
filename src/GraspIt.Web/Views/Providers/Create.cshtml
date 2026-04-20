@@ -1,0 +1,42 @@
+@model GraspIt.Application.DTOs.AiProviderDto
+
+@{ ViewData["Title"] = "Add AI Provider"; }
+
+<div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+        <h2>Add AI Provider</h2>
+        <form asp-action="Create">
+            <div class="mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="e.g. LM Studio, CloudGPT" required />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ProviderType" class="control-label"></label>
+                <select asp-for="ProviderType" class="form-control">
+                    <option value="OpenAICompatible">OpenAI Compatible (Local/vLLM/Ollama/OpenAI)</option>
+                    <option value="AzureOpenAI">Azure OpenAI</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Endpoint" class="control-label"></label>
+                <input asp-for="Endpoint" class="form-control" placeholder="http://localhost:1234/v1 or https://api.openai.com/v1" required />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ModelId" class="control-label">Model ID</label>
+                <input asp-for="ModelId" class="form-control" placeholder="e.g., local-model, llama3, gpt-4o" required />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ApiKey" class="control-label">API Key (Optional for Local)</label>
+                <input asp-for="ApiKey" class="form-control" placeholder="sk-..." />
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="IsDefault" class="form-check-input" />
+                <label asp-for="IsDefault" class="form-check-label">Set as Default fallback provider</label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

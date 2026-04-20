@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GraspIt.Application/GraspIt.Application.csproj" />
+    <Project Path="src/GraspIt.Core/GraspIt.Core.csproj" />
+    <Project Path="src/GraspIt.Infrastructure/GraspIt.Infrastructure.csproj" />
+    <Project Path="src/GraspIt.Web/GraspIt.Web.csproj" />
+  </Folder>
+  <Project Path="tests/GraspIt.Tests/GraspIt.Tests.csproj" />
+</Solution>
