@@ -87,7 +87,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<GraspItDbContext>();
-    context.Database.Migrate();
+    context.Database.EnsureCreated();
 
     if (!context.Users.Any())
     {
