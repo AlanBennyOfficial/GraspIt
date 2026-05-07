@@ -5,7 +5,7 @@
 <div class="row gx-3" style="min-height: calc(100vh - 140px);">
 
     <!-- LEFT SIDEBAR -->
-    <div class="col-md-3 chat-sidebar-col d-flex flex-column gap-2 py-3">
+    <div class="col-md-3 chat-sidebar-col d-flex flex-column gap-2 py-3 order-2 order-md-1">
         <div class="d-flex justify-content-between align-items-center px-2 mb-1">
             <span class="fw-bold text-secondary" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Chats</span>
             <button class="btn btn-sm btn-primary rounded-pill px-3 py-1" style="font-size: 0.78rem;" onclick="createNewSession()">+ New</button>
@@ -27,7 +27,7 @@
     </div>
 
     <!-- MAIN CHAT AREA -->
-    <div class="col-md-6 d-flex flex-column py-3">
+    <div class="col-md-6 main-chat-col d-flex flex-column py-3 order-1 order-md-2" style="height: calc(100vh - 140px);">
         <div class="card flex-grow-1 d-flex flex-column">
             <div class="card-header d-flex justify-content-between align-items-center py-3 px-4">
                 <h6 class="mb-0 fw-bold" id="chat-title">New Chat</h6>
@@ -38,6 +38,13 @@
                             <span class="toggle-slider"></span>
                         </label>
                         <span style="font-size: 0.78rem; font-weight: 500;">RAG</span>
+                    </div>
+                    <div class="rag-toggle" id="web-toggle" onclick="toggleWeb()">
+                        <label class="toggle-switch mb-0">
+                            <input type="checkbox" id="web-checkbox" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="font-size: 0.78rem; font-weight: 500;">Web</span>
                     </div>
                 </div>
             </div>
@@ -65,7 +72,7 @@
     </div>
 
     <!-- RIGHT SIDEBAR -->
-    <div class="col-md-3 d-flex flex-column gap-3 py-3">
+    <div class="col-md-3 d-flex flex-column gap-3 py-3 order-3 order-md-3">
         <div class="card">
             <div class="card-body p-3">
                 <label class="form-label mb-1" style="font-size: 0.78rem;">Active LLM Engine</label>
@@ -115,7 +122,7 @@
                         <option value="Other">Other</option>
                     </select>
                     <div class="input-group input-group-sm">
-                        <input type="file" class="form-control" name="file" accept=".pdf" required />
+                        <input type="file" class="form-control" name="file" accept=".pdf,.docx,.txt,.md,.csv,.pptx,.jpeg,.jpg,.png" required />
                         <button type="submit" class="btn btn-primary" style="font-size: 0.78rem;">Upload</button>
                     </div>
                 </form>
@@ -144,6 +151,13 @@
         document.getElementById('doc-filter-card').style.opacity = cb.checked ? '1' : '0.4';
     }
 
+    // ── Web Search Toggle ───────────────────────────────────────────
+    function toggleWeb() {
+        const cb = document.getElementById('web-checkbox');
+        cb.checked = !cb.checked;
+        document.getElementById('web-toggle').classList.toggle('active', cb.checked);
+    }
+
     // ── Chat Submission ─────────────────────────────────────────────
     document.getElementById('chat-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -153,6 +167,7 @@
 
         const providerId = document.getElementById('providerDropdown').value;
         const useRag = document.getElementById('rag-checkbox').checked;
+        const useWebSearch = document.getElementById('web-checkbox').checked;
 
         addMessage('You', message, 'user');
         input.value = '';
@@ -169,6 +184,7 @@
                     providerId: providerId ? parseInt(providerId) : null,
                     sessionId: currentSessionId,
                     useRag,
+                    useWebSearch,
                     documentIds: useRag ? selectedDocIds : []
                 })
             });
@@ -228,12 +244,24 @@
         const cssClass = role === 'user' ? 'msg-user' : 'msg-bot';
         const exportBtns = role === 'bot' ? buildExportButtons(text) : '';
         const label = role === 'user' ? '' : `<div class="msg-label"><strong>${role === 'error' ? '⚠️ System' : '🤖 ' + sender}</strong></div>`;
+        const safeText = text.replace(/"/g, '&quot;');
+        const copyBtn = `<button class="btn btn-sm btn-outline-secondary copy-btn" style="padding: 2px 6px; font-size: 0.7rem; border: none; opacity: 0.6;" title="Copy" onclick="copyToClipboard(this)" data-text="${safeText}">📋</button>`;
 
-        div.innerHTML = `<div class="${cssClass} p-3 shadow-sm">
-            ${label}
-            <div class="message-content">${formatted}</div>
-            ${exportBtns}
-        </div>`;
+        if (role === 'user') {
+            div.innerHTML = `
+                <div class="me-2 align-self-end mb-2">${copyBtn}</div>
+                <div class="${cssClass} p-3 shadow-sm">
+                    <div class="message-content">${formatted}</div>
+                </div>`;
+        } else {
+            div.innerHTML = `
+                <div class="${cssClass} p-3 shadow-sm">
+                    ${label}
+                    <div class="message-content">${formatted}</div>
+                    ${exportBtns}
+                </div>
+                <div class="ms-2 align-self-end mb-2">${copyBtn}</div>`;
+        }
 
         w.appendChild(div);
         w.scrollTop = w.scrollHeight;
@@ -255,6 +283,14 @@
                 <button type="submit" class="btn btn-sm export-btn">MD</button>
             </form>
         </div>`;
+    }
+
+    function copyToClipboard(btn) {
+        navigator.clipboard.writeText(btn.getAttribute('data-text')).then(() => {
+            const old = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = old, 2000);
+        });
     }
 
     function showTypingIndicator() {

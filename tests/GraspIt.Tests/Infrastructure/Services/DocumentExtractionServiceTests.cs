@@ -39,7 +39,7 @@ public class DocumentExtractionServiceTests
     [Fact]
     public async Task ExtractStructuredAsync_NullOrEmptyFile_ReturnsEmpty()
     {
-        var result = await _service.ExtractStructuredAsync(null);
+        var result = await _service.ExtractStructuredAsync(null!);
         result.RawText.Should().BeEmpty();
 
         var emptyMock = new Mock<IFormFile>();

@@ -18,10 +18,10 @@ public class RagSearchService
         _dbContext = dbContext;
     }
 
-    /// <summary>
+      /// <summary>
     /// ADVANCED RAG PIPELINE
     /// Demonstrates filtering, vector similarity search, and parent-child retrieval via Npgsql EF Core. 
-    /// </summary>
+      /// <summary>
     /// <param name="userQueryVector">The embedding generated from the User's query (e.g., using text-embedding-ada-002)</param>
     /// <param name="subjectFilter">The Subject Metadata to pre-filter on, so we avoid measuring distance against irrelevant data.</param>
     /// <param name="topK">The number of semantically related chunks to return.</param>

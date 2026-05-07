@@ -25,6 +25,7 @@
     <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
     <PackageReference Include="Polly" Version="8.6.6" />
     <PackageReference Include="QuestPDF" Version="2026.2.4" />
+    <PackageReference Include="Tesseract" Version="5.2.0" />
     <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
   </ItemGroup>
 

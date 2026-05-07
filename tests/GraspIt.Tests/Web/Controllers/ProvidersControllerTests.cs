@@ -155,11 +155,13 @@ public class ProvidersControllerTests
         redirectResult.ActionName.Should().Be("Index");
 
         var updated = await context.AiProviders.FindAsync(1);
-        updated.Name.Should().Be("Updated");
+        updated.Should().NotBeNull();
+        updated!.Name.Should().Be("Updated");
         updated.IsDefault.Should().BeTrue();
 
         var other = await context.AiProviders.FindAsync(2);
-        other.IsDefault.Should().BeFalse(); // Clears previous defaults
+        other.Should().NotBeNull();
+        other!.IsDefault.Should().BeFalse(); // Clears previous defaults
     }
 
     [Fact]

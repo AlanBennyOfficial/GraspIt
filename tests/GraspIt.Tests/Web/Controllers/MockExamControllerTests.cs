@@ -57,7 +57,8 @@ public class MockExamControllerTests
         var result = await controller.GenerateExam(null!, "instructions");
 
         var json = Assert.IsType<JsonResult>(result);
-        json.Value.ToString().Should().Contain("reference paper");
+        json.Value.Should().NotBeNull();
+        json.Value!.ToString().Should().Contain("reference paper");
     }
 
     [Fact]
@@ -70,7 +71,8 @@ public class MockExamControllerTests
         var result = await controller.GenerateExam(fileMock.Object, "");
 
         var json = Assert.IsType<JsonResult>(result);
-        json.Value.ToString().Should().Contain("Generation instructions");
+        json.Value.Should().NotBeNull();
+        json.Value!.ToString().Should().Contain("Generation instructions");
     }
 
     [Fact]
@@ -95,7 +97,8 @@ public class MockExamControllerTests
         var result = await controller.GenerateExam(fileMock.Object, "Generate it");
 
         var json = Assert.IsType<JsonResult>(result);
-        json.Value.ToString().Should().Contain("markdown");
+        json.Value.Should().NotBeNull();
+        json.Value!.ToString().Should().Contain("markdown");
         json.Value.ToString().Should().Contain("1");
     }
 
@@ -117,7 +120,8 @@ public class MockExamControllerTests
         var result = await controller.GenerateExam(fileMock.Object, "Generate it");
 
         var json = Assert.IsType<JsonResult>(result);
-        json.Value.ToString().Should().Contain("could not generate questions");
+        json.Value.Should().NotBeNull();
+        json.Value!.ToString().Should().Contain("could not generate questions");
     }
 
     [Fact]
@@ -149,6 +153,7 @@ public class MockExamControllerTests
         var result = await controller.GenerateExam(fileMock.Object, "Generate it");
 
         var json = Assert.IsType<JsonResult>(result);
-        json.Value.ToString().Should().Contain("OR");
+        json.Value.Should().NotBeNull();
+        json.Value!.ToString().Should().Contain("OR");
     }
 }

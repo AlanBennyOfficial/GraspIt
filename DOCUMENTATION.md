@@ -3,7 +3,7 @@
 > **Version:** MVP 1.0  
 > **Author:** Alan Benny  
 > **Architecture:** ASP.NET Core MVC (.NET 10) + PostgreSQL + pgvector  
-> **Last Updated:** April 9, 2026
+> **Last Updated:** May 7, 2026
 
 ---
 
@@ -28,6 +28,7 @@
 12. [Configuration](#12-configuration)
 13. [API Endpoints](#13-api-endpoints)
 14. [Error Handling & Resilience](#14-error-handling--resilience)
+15. [Testing Strategy](#15-testing-strategy)
 
 ---
 
@@ -35,10 +36,10 @@
 
 GraspIt is an AI-powered academic assistant that enables students to:
 
-- **Upload study materials** (PDFs) that are permanently stored, chunked, and embedded into a pgvector database for semantic retrieval
+- **Upload study materials** (PDFs, DOCX, TXT, Markdown, CSV, PPTX, JPEG, PNG) that are permanently stored, chunked, and embedded into a pgvector database for semantic retrieval
 - **Ask questions** with context retrieved from their uploaded documents using Retrieval-Augmented Generation (RAG), with per-document filtering and a real-time RAG toggle
 - **Generate mock exam papers** by uploading a reference question paper, which the system structurally analyzes to clone the format, retrieves syllabus context via RAG, uses a local LLM to generate new questions, and renders them as downloadable documents in four formats (DOCX, PDF, Markdown, LaTeX)
-- **Organize chats** into folders and sessions, with drag-and-drop reorganization and full message history persistence
+- **Organize chats** into folders and sessions, with drag-and-drop reorganization and persistent ChatHistory memory
 - **Export any AI response** directly from the chat workspace into Word, PDF, or Markdown files
 
 The system is designed to work with **local LLMs** (LM Studio, Ollama, vLLM) so students can use it without cloud API costs, while also supporting cloud providers (OpenAI, DeepSeek, Google Gemini) for higher quality results.
@@ -148,6 +149,7 @@ The chat workspace is the primary feature of GraspIt. It provides a full-feature
 - Each conversation is persisted as a `ChatSession` entity with a title auto-generated from the first message (truncated to 60 characters)
 - Individual messages (`ChatMessage`) store the role (`user`/`assistant`), content, timestamp, and whether RAG was used for that turn
 - Sessions load instantly from the database when clicked in the sidebar
+- **Contextual Memory**: The system loads the last 10 messages of the active session and injects them into Semantic Kernel's `IChatCompletionService` via `ChatHistory`, granting the AI continuous conversational awareness
 - Sessions can be deleted individually with a confirmation dialog
 
 #### Folder Organization with Drag-and-Drop
@@ -158,10 +160,11 @@ The chat workspace is the primary feature of GraspIt. It provides a full-feature
 - Folders display their session count as a badge and can be expanded/collapsed with a rotating arrow indicator
 - Deleting a folder moves its sessions back to "All Chats" (the database uses `ON DELETE SET NULL` on the `FolderId` foreign key)
 
-#### RAG Toggle
-- A toggle switch in the chat header enables/disables RAG context retrieval on a per-message basis
+#### RAG & Web Search Toggles
+- Two toggle switches in the chat header enable/disable RAG context and Web Search on a per-message basis
 - When **ON**: The user's query is embedded via the local embedding model, the most similar document chunks are retrieved from pgvector using cosine distance, and these chunks are prepended to the LLM prompt as context
 - When **OFF**: The query is sent directly to the LLM without any document context (general-purpose chat mode)
+- **Web Search ON**: The system queries the DuckDuckGo API (`api.duckduckgo.com`) in the background, extracting the abstract and related topics, and injects them into the prompt under `[Web Search Result]`
 - The document filter card visually dims when RAG is disabled (opacity 0.4)
 
 #### Document-Scoped RAG
@@ -186,6 +189,7 @@ The chat workspace is the primary feature of GraspIt. It provides a full-feature
 - Bot responses are parsed through `marked.js` for full Markdown rendering (headers, code blocks, tables, lists, inline code)
 - Markdown tables inside messages are styled with the dark theme's border and background colors via `.message-content table` CSS rules
 - Code blocks use a dark background with syntax-appropriate coloring
+- **Copy to Clipboard**: A non-intrusive `📋` copy button is positioned using Flexbox beside both user and AI message bubbles for immediate text extraction
 - Each bot message includes export buttons (DOCX, PDF, MD) that appear subtly at the bottom and become fully visible on hover
 
 #### Quick Upload
@@ -195,11 +199,14 @@ The chat workspace is the primary feature of GraspIt. It provides a full-feature
 ### 3.2 Document Management & Embedding
 
 #### Upload Pipeline
-1. User selects a PDF file and material type (Syllabus, Textbook, Slides, Notes, Previous Paper, Other)
+1. User selects a document file (PDF, DOCX, PPTX, TXT, Markdown, CSV, JPEG, PNG) and material type
 2. The file is saved to `wwwroot/uploads/` with a timestamp-prefixed filename to prevent collisions
 3. A `ProcessDocumentCommand` is dispatched via **Hangfire** as a background job (fire-and-forget)
 4. The `ProcessDocumentCommandHandler` executes:
-   - **PDF Text Extraction**: `PdfParserService` uses **UglyToad.PdfPig** to extract text from every page. If the PDF is corrupted or has an invalid header, a `try-catch` block gracefully returns an empty string instead of crashing the background worker
+   - **Multi-Format Text Extraction**: `PdfParserService` delegates to specific parsers based on file extension:
+     - PDFs via **UglyToad.PdfPig**
+     - Word (.docx) and PowerPoint (.pptx) via **DocumentFormat.OpenXml**
+     - Images (.jpeg, .png) via **Tesseract OCR** (automatically fetching `eng.traineddata` if missing)
    - **Document Record**: A `Document` entity is persisted with title, file path, type, and user ID
    - **Metadata Prepending**: The document type and title are prepended to the text for RAG contextualization: `[Source Document Type: Textbook]\n[Source Title: CN Textbook.pdf]\n\n{extracted text}`
    - **Chunking**: The text is split at double-newline boundaries. Segments over 2000 characters are sub-chunked into 1500-character blocks
@@ -709,3 +716,23 @@ builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = 100 * 1024 *
 ### Database
 - `EnsureCreated()` on startup handles first-run schema creation
 - Default user and provider seeding uses `if (!context.X.Any())` guards to prevent duplicate seeding
+
+---
+
+## 15. Testing Strategy
+
+GraspIt employs a comprehensive testing strategy using xUnit, Moq, and FluentAssertions to ensure high reliability across its core components and pipelines.
+
+### Web integration tests
+- **CustomWebApplicationFactory**: A specialized factory is used for end-to-end integration tests (`WebPipelineTests`). It actively strips out all Entity Framework PostgreSQL providers and Hangfire storage configurations, substituting them with `InMemoryDatabase` and `MemoryStorage`. This allows full controller-to-database integration testing without needing a live Docker environment or a real PostgreSQL instance.
+
+### Controller logic & Dependency Injection
+- Controllers are thoroughly unit-tested by mocking out the mediator (`IMediator`), infrastructure services (`IBackgroundJobClient`, `IPdfParserService`), and mapper (`IMapper`).
+- In-memory Entity Framework contexts are instantiated per-test (using unique GUID database names) to validate database interactions, such as document uploads, session creations, folder management, and LLM provider configuration.
+
+### RAG and Extraction Fallbacks
+- The `DocumentExtractionServiceTests` validate edge cases in the PDF parsing pipeline, ensuring that corrupted or empty files gracefully degrade to fallback markdown templates without crashing the system.
+- Tests verify the generation pipeline's resilience against LLM failures or improperly formatted JSON outputs, confirming that fallback structural and classic exam templates are safely returned to the user.
+
+### Nullability and Code Quality
+- The test suite strictly adheres to C# null-safety features (`<Nullable>enable</Nullable>`), utilizing null-forgiving operators where test setups guarantee non-null values, enforcing a zero-warning build pipeline.

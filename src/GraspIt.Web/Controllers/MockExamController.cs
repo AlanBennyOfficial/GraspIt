@@ -167,10 +167,10 @@ public class MockExamController : Controller
         return sb.ToString();
     }
 
-    /// <summary>
+      /// <summary>
     /// Serializes QuestionPaperData to the raw JSON format compatible with qn_format.json,
     /// including "OR" string literals in arrays.
-    /// </summary>
+      /// </summary>
     private static string SerializePaperToJson(QuestionPaperData paper)
     {
         var units = new List<object>();

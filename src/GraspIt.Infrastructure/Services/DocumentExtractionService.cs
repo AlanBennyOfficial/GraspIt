@@ -7,37 +7,37 @@ using UglyToad.PdfPig;
 
 namespace GraspIt.Infrastructure.Services;
 
-/// <summary>
+  
 /// Represents a structured exam paper with header metadata, sections, and questions.
 /// This model preserves the format of the original uploaded reference paper.
-/// </summary>
+  
 public class ExamPaperStructure
 {
-    /// <summary>Raw text lines extracted from the header block (institution, title, date, etc.).</summary>
+      /// <summary>Raw text lines extracted from the header block (institution, title, date, etc.).</summary>
     public List<string> HeaderLines { get; set; } = new();
 
-    /// <summary>Parsed top-level sections (Part A, Part B, Section 1, etc.).</summary>
+      /// <summary>Parsed top-level sections (Part A, Part B, Section 1, etc.).</summary>
     public List<ExamSection> Sections { get; set; } = new();
 
-    /// <summary>Full raw text from the PDF, used as format reference for the LLM prompt.</summary>
+      /// <summary>Full raw text from the PDF, used as format reference for the LLM prompt.</summary>
     public string RawText { get; set; } = string.Empty;
 
-    /// <summary>True if the reference paper actually contained a multi-column table structure.</summary>
+      /// <summary>True if the reference paper actually contained a multi-column table structure.</summary>
     public bool HasTableStructure { get; set; }
 
-    /// <summary>Column names detected or inferred from the reference paper header row.</summary>
+      /// <summary>Column names detected or inferred from the reference paper header row.</summary>
     public List<string> TableColumns { get; set; } = new() { "Q No", "Question", "Marks", "BT", "CO" };
 }
 
 public class ExamSection
 {
-    /// <summary>Section heading, e.g. "PART A", "Section 1", or empty if questions are not grouped.</summary>
+      /// <summary>Section heading, e.g. "PART A", "Section 1", or empty if questions are not grouped.</summary>
     public string Heading { get; set; } = string.Empty;
 
-    /// <summary>Optional annotation text beneath a heading, e.g. "(Answer All Questions)".</summary>
+      /// <summary>Optional annotation text beneath a heading, e.g. "(Answer All Questions)".</summary>
     public string SubHeading { get; set; } = string.Empty;
 
-    /// <summary>The questions belonging to this section.</summary>
+      /// <summary>The questions belonging to this section.</summary>
     public List<ExamQuestion> Questions { get; set; } = new();
 }
 
@@ -48,7 +48,7 @@ public class ExamQuestion
     public string Marks { get; set; } = string.Empty;
     public string BT { get; set; } = string.Empty;
     public string CO { get; set; } = string.Empty;
-    /// <summary>Sub-parts (a, b, c) if the question is compound.</summary>
+      /// <summary>Sub-parts (a, b, c) if the question is compound.</summary>
     public List<ExamQuestion> SubParts { get; set; } = new();
 }
 
@@ -69,10 +69,10 @@ public class DocumentExtractionService : IDocumentExtractionService
     private static readonly Regex CoPattern = new(@"\b(CO\s*[1-9]|PO\s*[1-9])\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private static readonly Regex TablePipePattern = new(@"\|", RegexOptions.Compiled);
 
-    /// <summary>
+      /// <summary>
     /// Legacy compatibility: returns a flat Markdown table for the LLM prompt context.
     /// This is still used by LocalOpenAIProvider to understand the reference paper's format.
-    /// </summary>
+      /// </summary>
     public async Task<string> ExtractExamTableAsync(IFormFile extractedFile)
     {
         var structure = await ExtractStructuredAsync(extractedFile);
@@ -82,10 +82,10 @@ public class DocumentExtractionService : IDocumentExtractionService
         return BuildMarkdownFromStructure(structure);
     }
 
-    /// <summary>
+      /// <summary>
     /// Full structured extraction: returns an <see cref="ExamPaperStructure"/> that the
     /// export pipeline uses to faithfully clone the original paper's layout.
-    /// </summary>
+      /// </summary>
     public async Task<ExamPaperStructure> ExtractStructuredAsync(IFormFile extractedFile)
     {
         if (extractedFile == null || extractedFile.Length == 0)

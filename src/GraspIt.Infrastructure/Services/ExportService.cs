@@ -11,11 +11,11 @@ using QuestPDF.Infrastructure;
 
 namespace GraspIt.Infrastructure.Services;
 
-/// <summary>
+  
 /// Provides multi-format export of AI-generated exam content.
 /// All formats (DOCX, PDF, Markdown, LaTeX) faithfully reproduce the
 /// structural layout of the original reference paper.
-/// </summary>
+  
 public class ExportService : IExportService
 {
     public ExportService()

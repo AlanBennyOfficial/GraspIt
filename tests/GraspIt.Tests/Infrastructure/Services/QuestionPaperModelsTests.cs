@@ -8,10 +8,10 @@ namespace GraspIt.Tests.Infrastructure.Services;
 
 public class QuestionPaperModelsTests
 {
-    /// <summary>
+      /// <summary>
     /// Verifies that qn_format.json can be deserialized into QuestionPaperData model,
     /// handling mixed-type arrays (objects and "OR" strings).
-    /// </summary>
+      /// </summary>
     [Fact]
     public void QuestionPaperData_CanParseQnFormatJson()
     {

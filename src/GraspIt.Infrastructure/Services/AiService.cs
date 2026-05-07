@@ -6,6 +6,7 @@ using Microsoft.SemanticKernel;
 using Polly;
 using Polly.Retry;
 using Microsoft.SemanticKernel.Http;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace GraspIt.Infrastructure.Services;
 
@@ -65,17 +66,32 @@ public class AiService : IAiService
         return kernelBuilder.Build();
     }
 
-    public async Task<string> GenerateResponseAsync(string prompt, string context, int? providerId = null)
+    public async Task<string> GenerateResponseAsync(string prompt, string context, int? providerId = null, List<ChatMessage>? history = null)
     {
         try 
         {
             var kernel = await BuildKernelAsync(providerId);
-            var fullPrompt = $"Context: {context}\n\n{prompt}";
+            var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
+            
+            var chatHistory = new ChatHistory();
+            chatHistory.AddSystemMessage("You are GraspIt, an AI academic assistant.");
+            
+            if (history != null)
+            {
+                foreach(var msg in history.OrderBy(m => m.CreatedAt))
+                {
+                    if (msg.Role == "user") chatHistory.AddUserMessage(msg.Content);
+                    else if (msg.Role == "assistant") chatHistory.AddAssistantMessage(msg.Content);
+                }
+            }
+
+            var fullPrompt = string.IsNullOrWhiteSpace(context) ? prompt : $"Context: {context}\n\n{prompt}";
+            chatHistory.AddUserMessage(fullPrompt);
 
             var result = await _retryPolicy.ExecuteAsync(async () => 
-                await kernel.InvokePromptAsync(fullPrompt)
+                await chatCompletion.GetChatMessageContentAsync(chatHistory)
             );
-            return result?.GetValue<string>() ?? "No response generated.";
+            return result?.Content ?? "No response generated.";
         }
         catch (Exception ex)
         {

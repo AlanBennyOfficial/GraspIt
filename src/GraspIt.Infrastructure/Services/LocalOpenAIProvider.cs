@@ -25,10 +25,10 @@ public interface ILLMProvider
 {
     Task<List<QuestionRow>> GenerateExamQuestionsAsync(string ocrMarkdown, string ragContext, string instructions);
 
-    /// <summary>
+      /// <summary>
     /// Generates structured question paper data in the format expected by
     /// LLM_qn_paper_generator.js (matching qn_format.json schema).
-    /// </summary>
+      /// </summary>
     Task<QuestionPaperData?> GenerateStructuredExamAsync(
         string ocrMarkdown, string ragContext, string instructions, QuestionPaperData? templateMetadata = null);
 }
@@ -145,11 +145,11 @@ public class LocalOpenAIProvider : ILLMProvider
         }
     }
 
-    /// <summary>
+      /// <summary>
     /// Generates a complete, structured question paper in qn_format.json schema.
     /// The LLM fills in questions while preserving all the structural metadata
     /// (units, OR separators, sub-parts with Bloom's and CO levels).
-    /// </summary>
+      /// </summary>
     public async Task<QuestionPaperData?> GenerateStructuredExamAsync(
         string ocrMarkdown, string ragContext, string instructions, QuestionPaperData? templateMetadata = null)
     {
@@ -215,10 +215,10 @@ public class LocalOpenAIProvider : ILLMProvider
         }
     }
 
-    /// <summary>
+      /// <summary>
     /// Custom parser for the qn_format.json structure that handles mixed arrays
     /// containing both objects and "OR" string literals.
-    /// </summary>
+      /// </summary>
     private static QuestionPaperData? ParseStructuredJson(string json)
     {
         try

@@ -45,7 +45,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">PDF File</label>
-                                <input type="file" class="form-control" name="file" accept=".pdf" required />
+                                <input type="file" class="form-control" name="file" accept=".pdf,.docx,.txt,.md,.csv,.pptx,.jpeg,.jpg,.png" required />
                             </div>
                             <div class="col-md-3">
                                 <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Upload & Embed</button>
@@ -103,7 +103,7 @@
                                                 }
                                             </td>
                                             <td>
-                                                <span class="text-muted" style="font-size: 0.85rem;">@doc.UploadedAt.ToString("dd MMM yyyy HH:mm")</span>
+                                                <span style="color: rgba(255, 255, 255, 0.75); font-size: 0.85rem;">@doc.UploadedAt.ToString("dd MMM yyyy HH:mm")</span>
                                             </td>
                                             <td class="text-end pe-4">
                                                 <form asp-action="Delete" asp-route-id="@doc.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this document and all its embeddings?')">

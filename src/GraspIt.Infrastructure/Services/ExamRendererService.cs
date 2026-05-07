@@ -7,11 +7,11 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace GraspIt.Infrastructure.Services;
 
-/// <summary>
+  
 /// Renders a structured exam paper into a properly formatted Word (DOCX) document.
 /// The document faithfully mirrors the sections, table layout, header, and column
 /// structure of the original uploaded reference paper.
-/// </summary>
+  
 public interface IExamRendererService
 {
     Task<byte[]> RenderExamToDocxAsync(ExamPaperStructure structure);
@@ -25,9 +25,9 @@ public class ExamRendererService : IExamRendererService
     // PUBLIC API
     // ─────────────────────────────────────────────────────────────────
 
-    /// <summary>
+      /// <summary>
     /// Primary renderer: uses the full parsed structure to faithfully mirror the original paper.
-    /// </summary>
+      /// </summary>
     public Task<byte[]> RenderExamToDocxAsync(ExamPaperStructure structure)
     {
         using var stream = new MemoryStream();
@@ -60,10 +60,10 @@ public class ExamRendererService : IExamRendererService
         return Task.FromResult(stream.ToArray());
     }
 
-    /// <summary>
+      /// <summary>
     /// Legacy overload: builds a simple table from a flat list of QuestionRow objects.
     /// Used as a fallback when the structured extraction is unavailable.
-    /// </summary>
+      /// </summary>
     public Task<byte[]> RenderExamToDocxAsync(List<QuestionRow> questions)
     {
         var structure = new ExamPaperStructure
@@ -271,10 +271,10 @@ public class ExamRendererService : IExamRendererService
         return map;
     }
 
-    /// <summary>
+      /// <summary>
     /// Computes DXA widths so columns sum to ~9638 (A4 full width with 1080pt margins each side).
     /// The "Question" column gets the most space.
-    /// </summary>
+      /// </summary>
     private static List<int> ComputeColumnWidths(List<string> cols)
     {
         const int total = 9638;

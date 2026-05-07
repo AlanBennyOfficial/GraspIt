@@ -1,16 +1,15 @@
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace GraspIt.Tests.Web;
 
-public class WebPipelineTests : IClassFixture<WebApplicationFactory<Program>>
+public class WebPipelineTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
 
-    public WebPipelineTests(WebApplicationFactory<Program> factory)
+    public WebPipelineTests(CustomWebApplicationFactory factory)
     {
         _factory = factory;
     }
@@ -24,7 +23,7 @@ public class WebPipelineTests : IClassFixture<WebApplicationFactory<Program>>
 
         // Assert
         response.EnsureSuccessStatusCode(); 
-        response.Content.Headers.ContentType.ToString().Should().Contain("text/html");
+        response.Content.Headers.ContentType!.ToString().Should().Contain("text/html");
     }
 
     [Fact]

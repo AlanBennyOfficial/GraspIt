@@ -13,32 +13,32 @@ using QuestPDF.Infrastructure;
 
 namespace GraspIt.Infrastructure.Services;
 
-/// <summary>
+  
 /// Generates high-fidelity exam paper documents by invoking the Node.js
 /// LLM_qn_paper_generator.js script. All formats (PDF, etc.) are derived
 /// from the DOCX output to ensure visual consistency.
-/// </summary>
+  
 public interface IQuestionPaperGeneratorService
 {
-    /// <summary>
+      /// <summary>
     /// Generates a DOCX file using the Node.js generator script.
-    /// </summary>
+      /// </summary>
     Task<byte[]> GenerateDocxAsync(QuestionPaperData paperData);
 
-    /// <summary>
+      /// <summary>
     /// Generates a DOCX and converts it to PDF.
     /// Uses LibreOffice CLI if available, otherwise falls back to QuestPDF.
-    /// </summary>
+      /// </summary>
     Task<byte[]> GeneratePdfAsync(QuestionPaperData paperData);
 
-    /// <summary>
+      /// <summary>
     /// Generates a Markdown representation of the question paper.
-    /// </summary>
+      /// </summary>
     byte[] GenerateMarkdown(QuestionPaperData paperData);
 
-    /// <summary>
+      /// <summary>
     /// Generates a LaTeX representation of the question paper.
-    /// </summary>
+      /// </summary>
     byte[] GenerateLatex(QuestionPaperData paperData);
 }
 
@@ -273,9 +273,9 @@ public class QuestionPaperGeneratorService : IQuestionPaperGeneratorService
         return null;
     }
 
-    /// <summary>
+      /// <summary>
     /// QuestPDF fallback renderer that matches the NITTE question paper format as defined in LLM_qn_paper_generator.js.
-    /// </summary>
+      /// </summary>
     private byte[] RenderPdfFromStructure(QuestionPaperData paper)
     {
         QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
@@ -657,10 +657,10 @@ public class QuestionPaperGeneratorService : IQuestionPaperGeneratorService
     // PRIVATE: Serialize C# model → qn_format.json-compatible JSON
     // ─────────────────────────────────────────────────────────────────
 
-    /// <summary>
+      /// <summary>
     /// Converts the QuestionPaperData model to the raw JSON format expected by
     /// LLM_qn_paper_generator.js, including "OR" string entries in arrays.
-    /// </summary>
+      /// </summary>
     private static string SerializeToGeneratorFormat(QuestionPaperData paper, JsonSerializerOptions options)
     {
         // Build a dynamic structure that matches qn_format.json exactly
@@ -722,9 +722,9 @@ public class QuestionPaperGeneratorService : IQuestionPaperGeneratorService
     }
 }
 
-/// <summary>
+  
 /// Provides access to the Tools directory path without coupling to ASP.NET's IWebHostEnvironment.
-/// </summary>
+  
 public interface IWebHostEnvironmentAccessor
 {
     string ToolsDirectory { get; }

@@ -96,7 +96,8 @@ public class DocumentsControllerTests
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         redirect.ActionName.Should().Be("Index");
-        controller.TempData["Success"].ToString().Should().Contain("scheduled for AI embedding");
+        controller.TempData["Success"].Should().NotBeNull();
+        controller.TempData["Success"]!.ToString().Should().Contain("scheduled for AI embedding");
 
         _backgroundJobClientMock.Verify(x => x.Create(
             It.Is<Job>(job => job.Method.Name == "Handle" && job.Type == typeof(ProcessDocumentCommandHandler)),

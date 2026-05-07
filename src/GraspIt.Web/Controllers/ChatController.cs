@@ -71,12 +71,21 @@ public class ChatController : Controller
             docIds = docIds.Distinct().ToList();
         }
 
+        var history = await _context.ChatMessages
+            .Where(m => m.SessionId == sessionId)
+            .OrderByDescending(m => m.CreatedAt)
+            .Take(10)
+            .ToListAsync();
+        history.Reverse();
+
         var query = new AskQuestionQuery
         {
             Query = request.Query,
             ProviderId = request.ProviderId,
             UseRag = request.UseRag,
-            DocumentIds = docIds.Count > 0 ? docIds : null
+            UseWebSearch = request.UseWebSearch,
+            DocumentIds = docIds.Count > 0 ? docIds : null,
+            History = history
         };
 
         var response = await _mediator.Send(query);
@@ -205,6 +214,7 @@ public class ChatRequest
     public int? ProviderId { get; set; }
     public int? SessionId { get; set; }
     public bool UseRag { get; set; } = true;
+    public bool UseWebSearch { get; set; } = false;
     public List<int>? DocumentIds { get; set; }
     public List<int>? FolderDocumentIds { get; set; }
 }

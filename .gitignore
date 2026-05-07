@@ -137,4 +137,11 @@ secrets.json
 
 # Node modules
 node_modules/
-
+
+.agents/
+skills-lock.json
+
+# Backups
+Backups/
+
+uploads/

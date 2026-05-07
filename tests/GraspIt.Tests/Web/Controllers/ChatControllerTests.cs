@@ -121,7 +121,8 @@ public class ChatControllerTests
 
         Assert.IsType<OkResult>(result);
         var updated = await context.ChatSessions.FindAsync(1);
-        updated.Title.Should().Be("New Title");
+        updated.Should().NotBeNull();
+        updated!.Title.Should().Be("New Title");
     }
 
     [Fact]
@@ -151,7 +152,8 @@ public class ChatControllerTests
 
         Assert.IsType<OkResult>(result);
         var s = await context.ChatSessions.FindAsync(1);
-        s.FolderId.Should().Be(10);
+        s.Should().NotBeNull();
+        s!.FolderId.Should().Be(10);
     }
 
     [Fact]
